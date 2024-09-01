@@ -159,12 +159,32 @@ void run_mha_fwd(Flash_fwd_params &params, cudaStream_t stream, bool force_split
             BOOL_SWITCH(params.is_causal, Is_causal, [&] {
                 if (params.num_splits <= 1 && !force_split_kernel) {  // If we don't set it num_splits == 0
                     run_mha_fwd_<elem_type, kHeadDim, Is_causal>(params, stream);
+//                    run_mha_fwd_<cutlass::bfloat16_t, 64, Is_causal>(params, stream);
+//                    run_mha_fwd_<cutlass::bfloat16_t, kHeadDim, Is_causal>(params, stream);
                 } else {
                     run_mha_fwd_splitkv_dispatch<elem_type, kHeadDim, Is_causal>(params, stream);
+//                    run_mha_fwd_splitkv_dispatch<cutlass::bfloat16_t, 64, Is_causal>(params, stream);
+//                    run_mha_fwd_splitkv_dispatch<cutlass::bfloat16_t, kHeadDim, Is_causal>(params, stream);
                 }
             });
         });
     });
+
+//    if(!params.is_bf16){
+//    using elem_type = cutlass::half_t;
+//    }else{
+//    using elem_type = cutlass::bfloat16_t;
+//
+//    }
+
+//    const static bool Is_causal = params.is_causal;
+//    if (params.num_splits <= 1 && !force_split_kernel) {  // If we don't set it num_splits == 0
+////        run_mha_fwd_<elem_type, 64, Is_causal>(params, stream);
+//        run_mha_fwd_<cutlass::bfloat16_t, 64, Is_causal>(params, stream);
+//    } else {
+////        run_mha_fwd_splitkv_dispatch<elem_type, 64, Is_causal>(params, stream);
+//        run_mha_fwd_splitkv_dispatch<cutlass::bfloat16_t, 64, Is_causal>(params, stream);
+//    }
 }
 
 // Find the number of splits that maximizes the occupancy. For example, if we have
@@ -974,7 +994,7 @@ mha_fwd_kvcache(at::Tensor &q,                 // batch_size x seqlen_q x num_he
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.doc() = "FlashAttention";
-    m.def("fwd", &mha_fwd, "Forward pass");
+//    m.def("fwd", &mha_fwd, "Forward pass");
     m.def("varlen_fwd", &mha_varlen_fwd, "Forward pass (variable length)");
     // m.def("bwd", &mha_bwd, "Backward pass");
     // m.def("varlen_bwd", &mha_varlen_bwd, "Backward pass (variable length)");
